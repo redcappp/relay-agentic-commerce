@@ -32,6 +32,3 @@ In the Razorpay dashboard, add `RAZORPAY_WEBHOOK_URL` as a public HTTPS webhook 
 
 Full Autonomous Mode is deliberately an **AUTONOMOUS TEST PAYMENT** path. It has no card credentials and no real-money capability. It uses the payment-provider abstraction, emits test capture/webhook events, and performs the same server-side payment-finalization path as a provider event.
 
-## Three-minute demonstration
-
-Launch **Buyer**, submit the prefilled headphones request, choose ElectroHub's Sony product, and confirm the test order. Open **Live flow** in a second tab to see every guardrail/tool/cache/seller event. Then use **Failure demo** to show TechNova rate-limited while ElectroHub remains available, and finish on **Reports** or **Audit**.
