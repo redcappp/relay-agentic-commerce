@@ -1,3 +1,4 @@
+import os
 import hashlib, hmac, json, uuid
 from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException, Request
@@ -13,7 +14,7 @@ from .config import FRONTEND_URL, RAZORPAY_KEY_ID, RAZORPAY_WEBHOOK_SECRET, RAZO
 from .payments import RazorpayPaymentProvider, DemoTestPaymentProvider, create_payment, finalize_captured_payment, payment_dict
 
 app=FastAPI(title="Agentic Commerce API",version="1.0.0")
-app.add_middleware(CORSMiddleware,allow_origins=[FRONTEND_URL,"http://localhost:5173"],allow_methods=["*"],allow_headers=["*"])
+app.add_middleware(CORSMiddleware,allow_origins=[FRONTEND_URL,os.getenv("FRONTEND_URL")],allow_methods=["*"],allow_headers=["*"])
 Base.metadata.create_all(engine)
 def _compat_migrate():
     """Small additive migration for the demo's pre-Alembic SQLite database."""
