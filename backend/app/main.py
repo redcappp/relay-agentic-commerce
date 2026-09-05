@@ -105,9 +105,11 @@ def verify_payment(body:PaymentVerifyIn,db:Session=Depends(get_db)):
     order=db.get(Order,body.order_id)
     payment=db.execute(select(Payment).where(Payment.order_id==body.order_id,Payment.provider_order_id==body.razorpay_order_id)).scalar_one_or_none()
     if not order or not payment: raise HTTPException(404,"Payment not found")
-    try: RazorpayPaymentProvider().verify_callback(db,payment,body.razorpay_payment_id,body.razorpay_signature,body.run_id)
+    provider=RazorpayPaymentProvider()
+    try:
+        provider.verify_callback(db,payment,body.razorpay_payment_id,body.razorpay_signature,body.run_id)
+        return provider.confirm_captured_payment(db,payment,body.run_id)
     except ValueError as exc: raise HTTPException(400,str(exc))
-    return payment_dict(payment,order)
 @app.post("/api/buyer/autonomous")
 def autonomous_purchase(body:Chat,db:Session=Depends(get_db)):
     result=run_search(db,body.prompt)

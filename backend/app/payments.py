@@ -65,6 +65,21 @@ class RazorpayPaymentProvider:
         emit(db,run_id,"buyer","razorpay callback","PAYMENT_CALLBACK_RECEIVED","OK","Razorpay callback received")
         emit(db,run_id,"buyer","payment verification","PAYMENT_SIGNATURE_VERIFIED","OK","Razorpay callback signature verified; awaiting captured webhook")
         return payment
+    def confirm_captured_payment(self, db: Session, payment: Payment, run_id: str):
+        """Confirm a verified callback with Razorpay when a webhook is delayed.
+
+        The callback signature proves the payment belongs to this order; this
+        additional provider API lookup makes the capture status authoritative.
+        A later signed webhook remains safe because finalization is idempotent.
+        """
+        if not payment.provider_payment_id:
+            return payment_dict(payment, db.get(Order, payment.order_id))
+        import razorpay
+        provider_payment=razorpay.Client(auth=(RAZORPAY_KEY_ID,RAZORPAY_KEY_SECRET)).payment.fetch(payment.provider_payment_id)
+        if provider_payment.get("status") != "captured":
+            return payment_dict(payment, db.get(Order, payment.order_id))
+        emit(db,run_id,"buyer","razorpay api","PAYMENT_CAPTURE_STATUS_CONFIRMED","OK","Razorpay API confirmed the payment is captured")
+        return finalize_captured_payment(db,payment,run_id,"provider_api")
 
 class DemoTestPaymentProvider:
     name="demo_autonomous"
